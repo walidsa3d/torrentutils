@@ -24,7 +24,6 @@ setup(
     install_requires=requires,
     test_suite="tests",
     license="mit",
-    zip_safe=False,
-    classifiers=(
-    )
+    zip_safe=False
+
 )
