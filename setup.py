@@ -22,6 +22,15 @@ setup(
     include_package_data=True,
     test_suite="tests",
     license="mit",
-    zip_safe=False
+    zip_safe=False,
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: Unix',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Utilities'
+    ]
 
 )
