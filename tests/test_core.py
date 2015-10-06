@@ -1,6 +1,6 @@
 import unittest
 
-from magneto import core
+from torrentutils import core
 
 
 class CoreTest(unittest.TestCase):

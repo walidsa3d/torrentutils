@@ -1,12 +1,12 @@
-#magneto
+#TorrentUtils
 
 ![alt text](https://travis-ci.org/walidsa3d/magneto.svg, "Build")
 A parser for magnet links
 
 #Install (manual)
 ```
-$ git clone git@github.com:walidsa3d/magneto.git
-$ cd magneto
+$ git clone git@github.com:walidsa3d/torrentutils.git
+$ cd torrentutils
 $ python setup.py install
 ```
 #License

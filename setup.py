@@ -10,13 +10,13 @@ except ImportError:
     read_md = lambda f: open(f, 'r').read()
 
 setup(
-    name="magneto",
+    name="torrentutils",
     version="0.3.0",
     description="A parser for magnet links",
     long_description=read_md('README.md'),
     author="Walid Saad",
     author_email="walid.sa3d@gmail.com",
-    url="https://github.com/walidsa3d/magneto",
+    url="https://github.com/walidsa3d/torrentutils",
     packages=find_packages(),
     package_data={'': ['LICENSE']},
     include_package_data=True,
