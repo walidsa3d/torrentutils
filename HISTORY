@@ -1,6 +1,29 @@
 Changelog
 =========
 
+%%version%% (unreleased)
+------------------------
+
+- Change package name. [walid]
+
+- Update setup.cfg, setup.py. [walid]
+
+- Add tests. [walid]
+
+- Change module name to core. [walid]
+
+0.3.0 (2015-10-04)
+------------------
+
+- Bump version: 0.2.0 → 0.3.0. [walid]
+
+0.2.0 (2015-10-04)
+------------------
+
+- Bump version: 0.1.0 → 0.2.0. [walid]
+
+- Remove dead code, update HISTORY. [walid]
+
 0.1.0 (2015-10-03)
 ------------------
 

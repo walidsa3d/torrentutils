@@ -11,8 +11,8 @@ except ImportError:
 
 setup(
     name="torrentutils",
-    version="0.3.0",
-    description="A parser for magnet links",
+    version="0.4.0",
+    description="Tools to manipulate torrents",
     long_description=read_md('README.md'),
     author="Walid Saad",
     author_email="walid.sa3d@gmail.com",
@@ -20,7 +20,7 @@ setup(
     packages=find_packages(),
     package_data={'': ['LICENSE']},
     include_package_data=True,
-    test_suite="tests",
+    test_suite="nose.collector",
     license="mit",
     zip_safe=False,
     classifiers=[

@@ -1,8 +1,10 @@
 #TorrentUtils
+Tools to manipulate torrents.
 
-![alt text](https://travis-ci.org/walidsa3d/magneto.svg, "Build")
-A parser for magnet links
-
+#Install (automatic)
+```
+$ pip install torrentutils
+```
 #Install (manual)
 ```
 $ git clone git@github.com:walidsa3d/torrentutils.git
