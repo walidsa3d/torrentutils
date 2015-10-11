@@ -8,7 +8,7 @@ import math
 from collections import defaultdict
 
 
-def parse(magnet_uri):
+def parse_magnet(magnet_uri):
     """returns a dictionary of parameters contained in the uri"""
     data = defaultdict(list)
     if not magnet_uri.startswith('magnet:'):
@@ -30,7 +30,8 @@ def parse(magnet_uri):
 
 def to_magnet(torrent_link):
     """converts a torrent file to a magnet link"""
-    response = requests.get(torrent_link, timeout=20)
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36'}
+    response = requests.get(torrent_link, headers=headers, timeout=20)
     with open('/tmp/tempfile.torrent', 'w') as out_file:
         out_file.write(response.content)
     torrent = open('/tmp/tempfile.torrent', 'r').read()
