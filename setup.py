@@ -11,7 +11,7 @@ except ImportError:
 
 setup(
     name="torrentutils",
-    version="0.4.0",
+    version="0.5.0",
     description="Tools to manipulate torrents",
     long_description=read_md('README.md'),
     author="Walid Saad",

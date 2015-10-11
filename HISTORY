@@ -1,8 +1,10 @@
 Changelog
 =========
 
-%%version%% (unreleased)
-------------------------
+0.4.0 (2015-10-11)
+------------------
+
+- Update README, many fixes. [walid]
 
 - Change package name. [walid]
 

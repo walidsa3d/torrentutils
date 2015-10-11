@@ -3,8 +3,10 @@ import requests
 import base64
 import bencode
 import hashlib
+import math
 
 from collections import defaultdict
+
 
 def parse(magnet_uri):
     """returns a dictionary of parameters contained in the uri"""
@@ -25,10 +27,10 @@ def parse(magnet_uri):
                 data[key] = value
     return data
 
+
 def to_magnet(torrent_link):
     """converts a torrent file to a magnet link"""
     response = requests.get(torrent_link, timeout=20)
-    print response
     with open('/tmp/tempfile.torrent', 'w') as out_file:
         out_file.write(response.content)
     torrent = open('/tmp/tempfile.torrent', 'r').read()
@@ -38,3 +40,18 @@ def to_magnet(torrent_link):
     b32hash = base64.b32encode(digest)
     magneturi = 'magnet:?xt=urn:btih:%s' % b32hash
     return magneturi
+
+
+def hsize(bytes):
+    """converts a bytes to human-readable format"""
+    sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    if bytes == 0:
+        return "0 Byte"
+    i = int(math.floor(math.log(bytes) / math.log(1024)))
+    r = round(bytes / math.pow(1024, i), 2)
+    return str(r) + '' + sizes[i]
+
+
+def ratio(leechs, seeds):
+    """ computes the torrent ratio"""
+    return seeds / leechs if leechs != 0 else float('inf')
