@@ -20,9 +20,9 @@ def parse_magnet(magnet_uri):
     if not magnet_uri.startswith('magnet:'):
         return data
     else:
-        magnet_uri = magnet_uri.strip("magnet:?")
+        magnet_uri = magnet_uri.strip('magnet:?')
         for segment in magnet_uri.split('&'):
-            key, value = segment.split("=")
+            key, value = segment.split('=')
             if key == 'dn':
                 data['name'] = requests.utils.unquote(value).replace('+', '.')
             elif key == 'xt':
@@ -62,7 +62,7 @@ def parse_torrent(torrent):
     try:
         metadata = bencode.bdecode(torrent)
     except bencode.BTL.BTFailure:
-        print "Not a valid encoded torrent"
+        print 'Not a valid encoded torrent'
         return None
     if 'announce-list' in metadata:
         md['trackers'] = []
@@ -74,10 +74,10 @@ def parse_torrent(torrent):
     if 'name' in metadata['info']:
         md['name'] = metadata['info']['name']
     webseeds = []
-    if "httpseeds" in metadata:
-        webseeds = metadata["httpseeds"]
-    if "url-list" in metadata:
-        webseeds += md["url-list"]
+    if 'httpseeds' in metadata:
+        webseeds = metadata['httpseeds']
+    if 'url-list' in metadata:
+        webseeds += md['url-list']
     if webseeds:
         md['webseeds'] = webseeds
     if 'created by' in metadata:
@@ -88,22 +88,35 @@ def parse_torrent(torrent):
     if 'comment' in metadata:
         md['comment'] = metadata['comment']
     md['piece_size'] = metadata['info']['piece length']
-    md['files'] = []
-    for item in metadata['info']['files']:
-        md['files'].append({'path': item['path'][0], 'length': item['length']})
+    if 'files' in metadata['info']:
+        md['files'] = []
+        for item in metadata['info']['files']:
+            md['files'].append({'path': item['path'][0], 'length': item['length']})
     hashcontents = bencode.bencode(metadata['info'])
     digest = hashlib.sha1(hashcontents).digest()
     md['infoHash'] = hashlib.sha1(hashcontents).hexdigest()
     b32hash = base64.b32encode(digest)
     md['infoHash_b32'] = b32hash
+    md['pieces'] = _split_pieces(metadata['info']['pieces'])
     return md
+
+
+def _split_pieces(buf):
+    pieces = []
+    i = 0
+    while i < len(buf):
+        byte_str = buf[i:i + 20]
+        hex_str = ''.join(["%02X" % ord(x) for x in byte_str]).strip()
+        pieces.append(hex_str)
+        i = i+20
+    return pieces
 
 
 def hsize(bytes):
     """converts a bytes to human-readable format"""
     sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
     if bytes == 0:
-        return "0 Byte"
+        return '0 Byte'
     i = int(math.floor(math.log(bytes) / math.log(1024)))
     r = round(bytes / math.pow(1024, i), 2)
     return str(r) + '' + sizes[i]
