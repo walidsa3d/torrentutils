@@ -1,3 +1,5 @@
+from __future__ import division
+
 import requests
 
 import base64
@@ -6,6 +8,9 @@ import hashlib
 import math
 
 from collections import defaultdict
+
+HEADERS = {'User-Agent':
+           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36'}
 
 
 def parse_magnet(magnet_uri):
@@ -30,17 +35,48 @@ def parse_magnet(magnet_uri):
 
 def to_magnet(torrent_link):
     """converts a torrent file to a magnet link"""
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36'}
-    response = requests.get(torrent_link, headers=headers, timeout=20)
+    md = parse_torrent(torrent_link)
+    if md:
+        magneturi = 'magnet:?xt=urn:btih:%s' % md['infoHash']
+        return magneturi
+    return None
+
+
+def parse_torrent(torrent_link):
+    """converts a torrent file to a magnet link"""
+    response = requests.get(torrent_link, headers=HEADERS, timeout=20)
     with open('/tmp/tempfile.torrent', 'w') as out_file:
         out_file.write(response.content)
-    torrent = open('/tmp/tempfile.torrent', 'r').read()
+    torrent = open('/tmp/tempfile.torrent', 'rb').read()
     metadata = bencode.bdecode(torrent)
+    md = {}
+    if 'announce-list' in metadata:
+        md['trackers'] = []
+        for tracker in metadata['announce-list']:
+            md['trackers'].append(tracker[0])
+    if 'announce' in metadata:
+        md['trackers'].append(metadata['announce'])
+    md['trackers'] = list(set(md['trackers']))
+    if 'name' in metadata['info']:
+        md['name'] = metadata['info']['name']
+    webseeds = []
+    if "httpseeds" in metadata:
+        webseeds = metadata["httpseeds"]
+    if "url-list" in metadata:
+        webseeds += md["url-list"]
+    if webseeds:
+        md['webseeds'] = webseeds
+    if 'created by' in metadata:
+        md['creator'] = metadata['created by']
+    if 'creation date' in metadata:
+        md['created'] = metadata['creation date']
+    if 'comment' in metadata:
+        md['comment'] = metadata['comment']
     hashcontents = bencode.bencode(metadata['info'])
     digest = hashlib.sha1(hashcontents).digest()
     b32hash = base64.b32encode(digest)
-    magneturi = 'magnet:?xt=urn:btih:%s' % b32hash
-    return magneturi
+    md['infoHash'] = b32hash
+    return md
 
 
 def hsize(bytes):
