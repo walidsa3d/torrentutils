@@ -87,10 +87,15 @@ def parse_torrent(torrent):
         md['created'] = utc_dt.strftime('%Y-%m-%d %H:%M:%S')
     if 'comment' in metadata:
         md['comment'] = metadata['comment']
+    md['piece_size'] = metadata['info']['piece length']
+    md['files'] = []
+    for item in metadata['info']['files']:
+        md['files'].append({'path': item['path'][0], 'length': item['length']})
     hashcontents = bencode.bencode(metadata['info'])
     digest = hashlib.sha1(hashcontents).digest()
+    md['infoHash'] = hashlib.sha1(hashcontents).hexdigest()
     b32hash = base64.b32encode(digest)
-    md['infoHash'] = b32hash
+    md['infoHash_b32'] = b32hash
     return md
 
 
@@ -106,4 +111,12 @@ def hsize(bytes):
 
 def ratio(leechs, seeds):
     """ computes the torrent ratio"""
-    return seeds / leechs if leechs != 0 else float('inf')
+    try:
+        ratio = float(seeds) / float(leechs)
+    except ZeroDivisionError:
+        ratio = int(seeds)
+    return ratio
+
+
+def make_torrent():
+    pass
