@@ -8,6 +8,7 @@ import hashlib
 import math
 
 from collections import defaultdict
+from datetime import datetime
 
 HEADERS = {'User-Agent':
            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36'}
@@ -42,14 +43,27 @@ def to_magnet(torrent_link):
     return None
 
 
-def parse_torrent(torrent_link):
-    """converts a torrent file to a magnet link"""
+def parse_remote_torrent(torrent_link):
+    """converts a remote torrent file to a magnet link"""
     response = requests.get(torrent_link, headers=HEADERS, timeout=20)
-    with open('/tmp/tempfile.torrent', 'w') as out_file:
-        out_file.write(response.content)
-    torrent = open('/tmp/tempfile.torrent', 'rb').read()
-    metadata = bencode.bdecode(torrent)
+    return parse_torrent(response.content)
+
+
+def parse_local_torrent(torrent_file):
+    """converts a local torrent file to a magnet link"""
+    with open(torrent_file, 'rb') as f:
+        data = parse_torrent(f.read())
+    return data
+
+
+def parse_torrent(torrent):
+    """parse a torrent buffer"""
     md = {}
+    try:
+        metadata = bencode.bdecode(torrent)
+    except bencode.BTL.BTFailure:
+        print "Not a valid encoded torrent"
+        return None
     if 'announce-list' in metadata:
         md['trackers'] = []
         for tracker in metadata['announce-list']:
@@ -69,7 +83,8 @@ def parse_torrent(torrent_link):
     if 'created by' in metadata:
         md['creator'] = metadata['created by']
     if 'creation date' in metadata:
-        md['created'] = metadata['creation date']
+        utc_dt = datetime.utcfromtimestamp(metadata['creation date'])
+        md['created'] = utc_dt.strftime('%Y-%m-%d %H:%M:%S')
     if 'comment' in metadata:
         md['comment'] = metadata['comment']
     hashcontents = bencode.bencode(metadata['info'])
