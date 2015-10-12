@@ -88,27 +88,26 @@ def parse_torrent(torrent):
     if 'comment' in metadata:
         md['comment'] = metadata['comment']
     md['piece_size'] = metadata['info']['piece length']
+    # treat case of single file
     if 'files' in metadata['info']:
         md['files'] = []
         for item in metadata['info']['files']:
-            md['files'].append({'path': item['path'][0], 'length': item['length']})
+            md['files'].append(
+                {'path': item['path'][0], 'length': item['length']})
     hashcontents = bencode.bencode(metadata['info'])
     digest = hashlib.sha1(hashcontents).digest()
     md['infoHash'] = hashlib.sha1(hashcontents).hexdigest()
     b32hash = base64.b32encode(digest)
     md['infoHash_b32'] = b32hash
     md['pieces'] = _split_pieces(metadata['info']['pieces'])
+    md['total_size'] = hsize(sum([x['length'] for x in md['files']]))
     return md
 
 
 def _split_pieces(buf):
-    pieces = []
-    i = 0
-    while i < len(buf):
-        byte_str = buf[i:i + 20]
-        hex_str = ''.join(["%02X" % ord(x) for x in byte_str]).strip()
-        pieces.append(hex_str)
-        i = i+20
+    to_hex = lambda byte_str: ''.join(
+        ["%02X" % ord(x) for x in byte_str]).strip()
+    pieces = [to_hex(buf[i:i + 20]) for i in xrange(0, len(buf), 20)]
     return pieces
 
 
