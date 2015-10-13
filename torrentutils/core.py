@@ -6,6 +6,8 @@ import base64
 import bencode
 import hashlib
 import math
+import os
+import re
 
 from collections import defaultdict
 from datetime import datetime
@@ -15,7 +17,7 @@ HEADERS = {'User-Agent':
 
 
 def parse_magnet(magnet_uri):
-    """returns a dictionary of parameters contained in the uri"""
+    """returns a dictionary of parameters contained in a magnet uri"""
     data = defaultdict(list)
     if not magnet_uri.startswith('magnet:'):
         return data
@@ -36,27 +38,28 @@ def parse_magnet(magnet_uri):
 
 def to_magnet(torrent_link):
     """converts a torrent file to a magnet link"""
-    md = parse_torrent(torrent_link)
+    md = parse_torrent_buffer(torrent_link)
     if md:
         magneturi = 'magnet:?xt=urn:btih:%s' % md['infoHash']
         return magneturi
     return None
 
 
-def parse_remote_torrent(torrent_link):
-    """converts a remote torrent file to a magnet link"""
-    response = requests.get(torrent_link, headers=HEADERS, timeout=20)
-    return parse_torrent(response.content)
-
-
-def parse_local_torrent(torrent_file):
-    """converts a local torrent file to a magnet link"""
-    with open(torrent_file, 'rb') as f:
-        data = parse_torrent(f.read())
+def parse_torrent_file(torrent):
+    """parse local or remote torrent file"""
+    link_re = re.compile(r'^(http?s|ftp)')
+    if link_re.match(torrent):
+        response = requests.get(torrent, headers=HEADERS, timeout=20)
+        data = parse_torrent_buffer(response.content)
+    elif os.path.isfile(torrent):
+        with open(torrent, 'rb') as f:
+            data = parse_torrent_buffer(f.read())
+    else:
+        data = None
     return data
 
 
-def parse_torrent(torrent):
+def parse_torrent_buffer(torrent):
     """parse a torrent buffer"""
     md = {}
     try:
@@ -88,7 +91,9 @@ def parse_torrent(torrent):
     if 'comment' in metadata:
         md['comment'] = metadata['comment']
     md['piece_size'] = metadata['info']['piece length']
-    # treat case of single file
+    if 'length' in metadata['info']:
+        md['file'] = {'path': metadata['info']['name'],
+                      'length': metadata['info']['length']}
     if 'files' in metadata['info']:
         md['files'] = []
         for item in metadata['info']['files']:
@@ -106,7 +111,7 @@ def parse_torrent(torrent):
 
 def _split_pieces(buf):
     to_hex = lambda byte_str: ''.join(
-        ["%02X" % ord(x) for x in byte_str]).strip()
+        ['%02X' % ord(x) for x in byte_str]).strip()
     pieces = [to_hex(buf[i:i + 20]) for i in xrange(0, len(buf), 20)]
     return pieces
 
