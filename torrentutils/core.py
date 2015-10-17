@@ -99,6 +99,7 @@ def parse_torrent_buffer(torrent):
         for item in metadata['info']['files']:
             md['files'].append(
                 {'path': item['path'][0], 'length': item['length']})
+    # TODO check if torrent is private and encoding
     hashcontents = bencode.bencode(metadata['info'])
     digest = hashlib.sha1(hashcontents).digest()
     md['infoHash'] = hashlib.sha1(hashcontents).hexdigest()
@@ -133,6 +134,27 @@ def ratio(leechs, seeds):
     except ZeroDivisionError:
         ratio = int(seeds)
     return ratio
+
+
+def to_torrent(magnet_link):
+    """turn a magnet link to a link to a torrent file"""
+    infoHash = parse_magnet(magnet_link)['infoHash']
+    torcache = 'http://torcache.net/torrent/' + infoHash + '.torrent'
+    torrage = 'https://torrage.com/torrent/' + infoHash + '.torrent'
+    reflektor = 'http://reflektor.karmorra.info/torrent/' + \
+        infoHash + '.torrent'
+    thetorrent = 'http://TheTorrent.org/'+infoHash
+    btcache = 'http://www.btcache.me/torrent/'+infoHash
+    for link in [torcache, torrage, reflektor, btcache, thetorrent]:
+        try:
+            print "Checking "+link
+            response = requests.head(link, headers=HEADERS)
+            if response.headers['content-type'] in ['application/x-bittorrent',
+                                                    'application/octet-stream']:
+                return link
+        except requests.exceptions.ConnectionError:
+            pass
+    return
 
 
 def make_torrent():

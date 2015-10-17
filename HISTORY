@@ -1,6 +1,22 @@
 Changelog
 =========
 
+%%version%% (unreleased)
+------------------------
+
+- Some refactoring. [walid]
+
+- Compute total size of torrent files. [walid]
+
+- Parse torrent pieces. [walid]
+
+- Get list of files from torrent. [walid]
+
+0.8.0 (2015-10-12)
+------------------
+
+- Convert dates to human readable format. [walid]
+
 0.7.0 (2015-10-12)
 ------------------
 
